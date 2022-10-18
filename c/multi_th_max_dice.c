@@ -85,3 +85,4 @@ void number_generator(void *mtx)
     }
 
 }
+
