@@ -1,0 +1,1 @@
+int scanArray(int *inputArray);
