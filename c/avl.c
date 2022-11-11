@@ -203,12 +203,12 @@ struct avlnode *delete_helper(struct avlnode *root, struct avlnode *node){
 void show(struct avlnode *root){
     
     if(root->key != -1){
-        printf("%d:%s:%d \n", root->key, root->value, root->h);
+        printf("%d:%s:%d ", root->key, root->value, root->h + 1);
         // Segmentation fault spostato qui
         show(root->left);
         show(root->right);
     } else {
-        printf("%s \n", "NULL");
+        printf("%s ", "NULL");
     }
 }
 
@@ -219,6 +219,21 @@ int max(int a, int b){
         return b;
     }
 }
+
+/*
+
+--- killer input ---
+
+insert 3 three
+insert 7 seven
+insert 9 nine
+insert 0 zero
+insert 12 twelve
+show
+find 3
+exit
+
+*/
 
 int main() {
     
@@ -258,13 +273,14 @@ int main() {
             
             p = p + sizeof(char)*2;
             strcpy(new_node->value, p);
+            new_node->value[strlen(new_node->value)-1] = '\0';
             tree = insert(tree, new_node);
-        } else if(c == 'r') {
+        } else if(c == 'r') { // not working
             p = p + sizeof(char)*7;
             tree = delete(tree, atoi(p));
         } else if(c == 'f'){
             p = p + sizeof(char)*5;
-            printf("%d \n", find(tree, atoi(p))->key);
+            printf("%s \n", find(tree, atoi(p))->value);
         } else if(c == 'c'){
             free(tree);
             struct avlnode *tree = malloc(sizeof(*tree));
