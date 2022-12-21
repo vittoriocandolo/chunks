@@ -1,296 +1,231 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <string.h>
 
 #define SIZE 64
 
-struct avlnode {
-	int key;
-	char value[SIZE];
-	int h;
-	struct avlnode* left;
-	struct avlnode* right;
-	struct avlnode* parent;
+struct avlnode{
+  int key;
+  char value[SIZE];
+  int h;
+  struct avlnode *left;
+  struct avlnode *right;
 };
 
-struct avlnode *avlfix(struct avlnode *root, struct avlnode *new);
-
-struct avlnode *insert(struct avlnode *root, struct avlnode *new){
-    
-    struct avlnode *current = malloc(sizeof(*current));
-    current = root;
-    struct avlnode *pre = malloc(sizeof(*pre));
-    pre->key = -1;
-    
-    while(current->key != -1){
-        
-        pre = current;
-        
-        if(new->key < current->key){
-            current = current->left;
-        } else {
-            current = current->right;
-        }
-    }
-    
-    if(pre->key == -1){
-        root = new;
-    } else {
-        
-        new->parent = pre;
-        
-        if(new->key < pre->key){
-            pre->left = new;
-        } else {
-            pre->right = new;
-        }
-    }
-    return avlfix(root, new);
-}
-
-int max(int a, int b);
-
-struct avlnode rotate_left(struct avlnode *root, struct avlnode *node){
-    
-    struct avlnode *p = malloc(sizeof(*node));
-    p = node->parent;
-    
-    struct avlnode *r = malloc(sizeof(*node));
-    r = node->right;
-    
-    node->right = r->left;
-    
-    if(node->right->key != -1){
-        node->right->parent = node;
-    }
-    
-    r->parent = p;
-    
-    if(node->parent->key == -1){
-        root = r;
-    } else if(node == node->parent->right){
-        node->parent->right = r;
-    } else {
-        node->parent->left = r;
-    }
-    
-    r->left = node;
-    node->parent = r;
-    
-    node->h = max(node->left->h, node->right->h) + 1;
-    r->h = max(r->left->h, r->right->h) + 1;
-    
-    return *root;
-}
-
-struct avlnode rotate_right(struct avlnode *root, struct avlnode *node){
-    
-    struct avlnode *p = malloc(sizeof(*node));
-    p = node->parent;
-    
-    struct avlnode *l = malloc(sizeof(*node));
-    l = node->left;
-    
-    node->left = l->right;
-    
-    if(node->left->key != -1){
-        node->left->parent = node;
-    }
-    
-    l->parent = p;
-    
-    if(node->parent->key == -1){
-        root = l;
-    } else if(node == node->parent->right){
-        node->parent->right = l;
-    } else {
-        node->parent->left = l;
-    }
-    
-    l->right = node;
-    node->parent = l;
-    
-    node->h = max(node->left->h, node->right->h) + 1;
-    l->h = max(l->left->h, l->right->h) + 1;
-    
-    return *root;
-}
-
-struct avlnode *avlfix(struct avlnode *root, struct avlnode *new){
-    
-    struct avlnode *pre = malloc(sizeof(*pre));
-    pre = new->parent;
-    
-    while(pre->key != -1){ // segmentation fault (prima)
-    
-        pre->h = 1 + max(pre->left->h, pre->right->h);
-        
-        int balance = pre->left->h - pre->right->h;
-        
-        if(abs(balance) > 1){
-            
-            if(balance > 1){
-                
-                if(new->key > pre->left->key){
-                    
-                    *root = rotate_left(root, pre->left);
-                    *root = rotate_right(root, pre);
-                } else {
-                    *root = rotate_right(root, pre);
-                }
-            } else if(balance < -1){
-                
-                if(new->key < pre->right->key){
-                    
-                    *root = rotate_right(root, pre->right);
-                    *root = rotate_left(root, pre);
-                } else {
-                    *root = rotate_left(root, pre);
-                }
-            }
-        }
-        pre = pre->parent;
-    }
-    return root;
-}
-
-struct avlnode *find(struct avlnode *root, int key){
-    
-    struct avlnode *nf = malloc(sizeof(*nf));
-    nf->key = -1;
-    
-    while(root->key != -1){
-        
-        if(root->key == key){
-            return root;
-        } else if(root->key < key){
-            root = root->right;
-        } else if(root->key > key){
-            root = root->left;
-        }
-    }
-    return nf;
-}
-
-struct avlnode *delete_helper(struct avlnode *root, struct avlnode *node);
-
-struct avlnode *delete(struct avlnode *root, int key){
-    
-    struct avlnode *node = malloc(sizeof(*node));
-    node = find(root, key);
-    
-    /*
-        if(node->left->key == -1 && node->right->key == -1){
-        delete_helper(root, node);
-    } else {
-    */
-    node->key = INT_MAX;
-    avlfix(root, node);
-    delete_helper(root, node);
-    //}
-}
-
-struct avlnode *delete_helper(struct avlnode *root, struct avlnode *node){
-    
-    if(node->parent->left == node){
-            node->parent->left->key = -1;
-        } else {
-            node->parent->right->key = -1;
-        }
-}
-
-void show(struct avlnode *root){
-    
-    if(root->key != -1){
-        printf("%d:%s:%d ", root->key, root->value, root->h + 1);
-        // Segmentation fault spostato qui
-        show(root->left);
-        show(root->right);
-    } else {
-        printf("%s ", "NULL");
-    }
+int height(struct avlnode *node){
+  if(!node){
+    return 0;
+  } else {
+    return node->h;
+  }
 }
 
 int max(int a, int b){
-    if(a >= b){
-        return a;
-    } else {
-        return b;
-    }
+  if(a >= b){
+    return a;
+  } else {
+    return b;
+  }
 }
 
-/*
+struct avlnode *new_node(int key, char *value, int h){
+  struct avlnode *node = malloc(sizeof(struct avlnode));
+  node->key = key;
+  strcpy(node->value, value);
+  node->h = 1;
+  node->left = NULL;
+  node->right = NULL;
+  return node;
+}
 
---- killer input ---
+struct avlnode *rr(struct avlnode *node){
+  struct avlnode *x = node->left;
+  struct avlnode *y = x->right;
+  x->right = node;
+  node->left = y;
+  node->h = max(height(node->left), height(node->right)) + 1;
+  x->h = max(height(x->left), height(x->right)) + 1;
+  return x;
+}
 
-insert 3 three
-insert 7 seven
-insert 9 nine
-insert 0 zero
-insert 12 twelve
-show
-find 3
-exit
+struct avlnode *lr(struct avlnode *node){
+  struct avlnode *y = node->right;
+  struct avlnode *x = y->left;
+  y->left = node;
+  node->right = x;
+  node->h = max(height(node->left), height(node->right)) + 1;
+  y->h = max(height(y->left), height(y->right)) + 1;
+  return y;
+}
 
-*/
+int balance(struct avlnode *node){
+  if(!node){
+    return 0;
+  } else {
+    return height(node->left) - height(node->right);
+  }
+}
 
-int main() {
-    
-    struct avlnode *tree = malloc(sizeof(*tree));
-    tree->key = -1;
-    strcpy(tree->value, "NULL");
-    tree->h = 0;
-    /*
-    tree->left->key = -1;
-    tree->right->key = -1;
-    tree->parent->key = -1;
-    */
-    
-    char input[SIZE];
-    
-    while(1){
-        fgets(input, SIZE, stdin);
-        char *p = input;
-        char c = p[0];
-        if(c == 'i'){
-            p = p + sizeof(char)*7;
-            struct avlnode *new_node = malloc(sizeof(*new_node));
-            new_node->key = atoi(p);
-            
-            // SEGMENTATION FAULT causato da assenza parent
-            struct avlnode *new_parent = malloc(sizeof(*new_parent));
-            new_parent->key = -1;
-            new_node->parent = new_parent;
-            
-            // SEGMENTATION FAULT causato (poi) da assenza figli
-            struct avlnode *new_left = malloc(sizeof(*new_left));
-            new_left->key = -1;
-            new_node->left = new_left;
-            struct avlnode *new_right = malloc(sizeof(*new_right));
-            new_right->key = -1;
-            new_node->right = new_right;
-            
-            p = p + sizeof(char)*2;
-            strcpy(new_node->value, p);
-            new_node->value[strlen(new_node->value)-1] = '\0';
-            tree = insert(tree, new_node);
-        } else if(c == 'r') { // not working
-            p = p + sizeof(char)*7;
-            tree = delete(tree, atoi(p));
-        } else if(c == 'f'){
-            p = p + sizeof(char)*5;
-            printf("%s \n", find(tree, atoi(p))->value);
-        } else if(c == 'c'){
-            free(tree);
-            struct avlnode *tree = malloc(sizeof(*tree));
-            tree->key = -1;
-            strcpy(tree->value, "NULL");
-            tree->h = 0;
-        } else if(c == 's'){
-            show(tree);
-        } else {
-            return 0;
-        }
+struct avlnode *insert(struct avlnode *root, struct avlnode *node){
+  if(!root){
+    return node;
+  }
+  if(node->key < root->key){
+    root->left = insert(root->left, node);
+  }
+  else if(node->key > root->key){
+    root->right = insert(root->right, node);
+  } else {
+    return root;
+  }
+  root->h = 1 + max(height(root->left), height(root->right));
+  int b = balance(root);
+  if(b > 1 && node->key < root->left->key){
+    return rr(root);
+  }
+  if(b < -1 && node->key > root->right->key){
+    return lr(root);
+  }
+  if(b > 1 && node->key > root->left->key){
+    root->left = lr(root->left);
+    return rr(root);
+  }
+  if(b < -1 && node->key < root->right->key){
+    root->right = rr(root->right);
+    return lr(root);
+  }
+  return root;
+}
+
+struct avlnode *min(struct avlnode *node){
+  struct avlnode *current = node;
+  while(current->left != NULL){
+    current = current->left;
+  }
+  return current;
+}
+
+struct avlnode *delete(struct avlnode *root, int key){
+  if(!root){
+    return root;
+  }
+  if(key < root->key){
+    root->left = delete(root->left, key);
+  }
+  else if(key > root->key){
+    root->right = delete(root->right, key);
+  } else {
+    if((!root->left) || (!root->right)){
+      struct avlnode *temp;
+      if(root->left){
+        temp = root->left;
+      } else {
+        temp = root->right;
+      }
+      if(!temp){
+        temp = root;
+        root = NULL;
+      } else {
+        *root = *temp;
+      }
+    } else {
+      struct avlnode *temp = min(root->right);
+      root->key = temp->key;
+      strcpy(root->value, temp->value);
+      root->right = delete(root->right, temp->key);
     }
+  }
+  if(!root){
+    return root;
+  }
+  root->h = 1 + max(height(root->left), height(root->right));
+  int b = balance(root);
+  if(b > 1 && balance(root->left) >= 0){
+    return rr(root);
+  }
+  if(b > 1 && balance(root->left) < 0){
+    root->left = lr(root->left);
+    return rr(root);
+  }
+  if(b < -1 && balance(root->right) <= 0){
+    return lr(root);
+  }
+  if(b < -1 && balance(root->right) > 0){
+    root->right = rr(root->right);
+    return lr(root);
+  }
+  return root;
+}
+
+struct avlnode *find(struct avlnode *root, int key){
+  while(root){
+    if(root->key == key){
+      return root;
+    } else if(root->key < key){
+      root = root->right;
+    } else {
+      root = root->left;
+    }
+  }
+  return NULL;
+}
+
+void show(struct avlnode *root){
+  if(root){
+    printf("%d:%s:%d ", root->key, root->value, root->h);
+    show(root->left);
+    show(root->right);
+  } else {
+    printf("%s ", "NULL");
+  }
+}
+
+int count_digits(int n){
+  int c = 0;
+  if(n == 0){
+    return 1;
+  } else {
+    while(n != 0){
+      n = n / 10;
+      c++;
+    }
+  }
+  return c;
+}
+
+int main(){
+  struct avlnode *tree = malloc(sizeof(*tree));
+  tree = NULL;
+  char input[SIZE];
+  while(1){
+    fgets(input, SIZE, stdin);
+    char *p = input;
+    char c = p[0];
+    if(c == 'i'){
+      p = p + sizeof(char) * 7;
+      struct avlnode *node = new_node(0, "0", 1);
+      node->key = atoi(p);
+      p = p + sizeof(char) * (count_digits(node->key) + 1);
+      strcpy(node->value, p);
+      node->value[strlen(node->value) - 1] = '\0';
+      tree = insert(tree, node);
+    } else if(c == 'r'){
+      p = p + sizeof(char) * 7;
+      if(!tree->left && !tree->right){
+        tree = NULL;
+      } else {
+        tree = delete(tree, atoi(p));
+      }
+    } else if(c == 'f'){
+      p = p + sizeof(char) * 5;
+      printf("%s \n", find(tree, atoi(p))->value);
+    } else if(c == 'c'){
+      tree = NULL;
+    } else if(c == 's'){
+      show(tree);
+      printf("\n");
+    } else {
+      return 0;
+    }
+  }
 }
