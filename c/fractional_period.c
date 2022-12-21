@@ -10,13 +10,13 @@ int quadFractionalPeriod(char *s){
         for(int i = 0; (i < n) && guard; i++){
             if(s[i] != s[i % p]){
                 guard = 0;
-                
             }
         }
         if(guard){
             return p;
         }
     }
+    return 0;
 }
 
 int maxBorder(char *s){
@@ -62,4 +62,3 @@ int main(){
     //printf("%d", maxBorder(word));
     printf("%d", maxPeriod(word));
 }
-
